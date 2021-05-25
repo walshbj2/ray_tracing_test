@@ -1,0 +1,31 @@
+name: Build and test
+
+# Run the jobs for pushes and pull requests targeting main branch.
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Job which sets up the dependencies and builds the project.
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+        python-version: [3.8]
+    name: 'Build ${{ matrix.os }} <py=${{ matrix.python-version }}, go=${{ matrix.go-version }}>'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: "Install dependencies"
+        run: pip install -r requirements.txt
+      - name: "Install ray_tracing_test"
+        run: python setup.py install
+      - name: "Run Tests"
+        run: python -m pytest ./tests
